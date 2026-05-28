@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hub RH — Documentos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:        #2563eb;
+      --blue-dark:   #1d4ed8;
+      --blue-light:  #dbeafe;
+      --green:       #10b981;
+      --green-light: #d1fae5;
+      --red-light:   #fef2f2;
+      --red-border:  #fecaca;
+      --red-text:    #991b1b;
+      --bg:          #f1f5f9;
+      --surface:     #ffffff;
+      --border:      #e2e8f0;
+      --text:        #1e293b;
+      --muted:       #64748b;
+      --shadow:      0 4px 24px rgba(0,0,0,0.07);
+      --radius:      14px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #3b82f6 100%);
+      padding: 52px 24px 72px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 60% 0%, rgba(255,255,255,0.12) 0%, transparent 65%);
+    }
+    .header-inner { position: relative; z-index: 1; }
+    .header h1 {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+    .header p {
+      margin-top: 8px;
+      color: rgba(255,255,255,0.75);
+      font-size: 1rem;
+    }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 780px;
+      margin: -36px auto 60px;
+      padding: 0 16px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    /* ── STEP LABEL ── */
+    .step-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .step-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-text {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+    }
+
+    /* ── DOC TYPE GRID ── */
+    .doc-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .doc-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 8px 14px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, transform 0.15s, box-shadow 0.18s;
+      user-select: none;
+      background: #fafbfc;
+    }
+    .doc-card:hover {
+      border-color: var(--blue);
+      background: var(--blue-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(37,99,235,0.14);
+    }
+    .doc-card.active {
+      border-color: var(--blue);
+      background: var(--blue-light);
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.16);
+    }
+    .doc-card .icon { font-size: 1.9rem; margin-bottom: 8px; }
+    .doc-card .label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.2;
+    }
+    .doc-card.active .label { color: var(--blue); }
+
+    /* ── UPLOAD ZONE ── */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s;
+      background: #fafbfc;
+      position: relative;
+    }
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: var(--blue);
+      background: var(--blue-light);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .upload-icon { font-size: 2.6rem; margin-bottom: 10px; }
+    .upload-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .upload-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── FILE CHIP ── */
+    .file-chip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      background: var(--green-light);
+      border-radius: 10px;
+      margin-top: 12px;
+      border: 1px solid #a7f3d0;
+    }
+    .file-chip-icon { font-size: 1.4rem; }
+    .file-chip-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #065f46;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-chip-size {
+      font-size: 0.75rem;
+      color: #047857;
+      white-space: nowrap;
+    }
+    .file-chip-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #6b7280;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .file-chip-remove:hover { background: rgba(0,0,0,0.08); }
+
+    /* ── PROCESS BUTTON ── */
+    .btn-process {
+      width: 100%;
+      padding: 16px;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.15s, box-shadow 0.18s, opacity 0.18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+    }
+    .btn-process:hover:not(:disabled) {
+      background: var(--blue-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(37,99,235,0.35);
+    }
+    .btn-process:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── SPINNER ── */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 3px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ERROR ── */
+    .error-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 13px 16px;
+      background: var(--red-light);
+      border: 1px solid var(--red-border);
+      border-radius: 10px;
+      margin-top: 12px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--red-text);
+      line-height: 1.5;
+    }
+
+    /* ── RESULT CARD ── */
+    .result-card {
+      background: var(--green-light);
+      border-color: #a7f3d0;
+    }
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .result-check { font-size: 2rem; }
+    .result-header h3 { font-size: 1.05rem; font-weight: 600; color: #065f46; }
+    .result-header p  { font-size: 0.82rem; color: #047857; margin-top: 2px; }
+
+    .file-list { list-style: none; margin-bottom: 20px; display: flex; flex-direction: column; gap: 7px; }
+    .file-list li {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.65);
+      border-radius: 9px;
+      font-size: 0.845rem;
+      font-weight: 500;
+      color: #065f46;
+    }
+
+    .btn-download {
+      width: 100%;
+      padding: 15px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.18s, transform 0.15s, box-shadow 0.18s;
+      margin-bottom: 10px;
+    }
+    .btn-download:hover {
+      background: #059669;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(16,185,129,0.35);
+    }
+
+    .btn-reset {
+      width: 100%;
+      padding: 11px;
+      background: none;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-reset:hover { background: var(--bg); color: var(--text); }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .doc-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 380px) {
+      .doc-grid { grid-template-columns: repeat(2, 1fr); }
+      .card { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <h1>📂 Hub de Documentos RH</h1>
+    <p>Organize seus documentos com poucos cliques</p>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- Step 1: Tipo -->
+  <div class="card">
+    <div class="step-label">
+      <span class="step-badge">1</span>
+      <span class="step-text">Selecione o tipo de documento</span>
+    </div>
+    <div class="doc-grid">
+      <div class="doc-card" data-tipo="ficha" onclick="selectTipo(this)">
+        <span class="icon">📄</span>
+        <span class="label">Ficha</span>
+      </div>
+      <div class="doc-card" data-tipo="trct" onclick="selectTipo(this)">
+        <span class="icon">📑</span>
+        <span class="label">TRCT</span>
+      </div>
+      <div class="doc-card" data-tipo="seguro" onclick="selectTipo(this)">
+        <span class="icon">🪪</span>
+        <span class="label">Seguro</span>
+      </div>
+      <div class="doc-card" data-tipo="ponto" onclick="selectTipo(this)">
+        <span class="icon">⏱️</span>
+        <span class="label">Ponto RM</span>
+      </div>
+      <div class="doc-card" data-tipo="informe" onclick="selectTipo(this)">
+        <span class="icon">💰</span>
+        <span class="label">Informe</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Upload -->
+  <div class="card">
+    <div class="step-label">
+      <span class="step-badge">2</span>
+      <span class="step-text">Envie o arquivo PDF</span>
+    </div>
+
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept=".pdf" onchange="onFileChange(this)" />
+      <div class="upload-icon" id="uploadIcon">📤</div>
+      <div class="upload-title">Arraste ou clique para selecionar</div>
+      <div class="upload-sub">Somente arquivos PDF</div>
+    </div>
+
+    <div class="file-chip" id="fileChip" style="display:none">
+      <span class="file-chip-icon">📄</span>
+      <span class="file-chip-name" id="fileName"></span>
+      <span class="file-chip-size" id="fileSize"></span>
+      <button class="file-chip-remove" onclick="removeFile()" title="Remover arquivo">✕</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Ação -->
+  <div class="card" id="actionCard">
+    <button class="btn-process" id="btnProcess" onclick="processar()" disabled>
+      <span id="btnIcon">🚀</span>
+      <span id="btnText">Processar Documento</span>
+    </button>
+    <div class="error-box" id="errorBox" style="display:none">
+      <span>⚠️</span>
+      <span id="errorText"></span>
+    </div>
+  </div>
+
+  <!-- Resultado -->
+  <div class="card result-card" id="resultCard" style="display:none">
+    <div class="result-header">
+      <span class="result-check">✅</span>
+      <div>
+        <h3>Processamento concluído!</h3>
+        <p id="resultCount"></p>
+      </div>
+    </div>
+    <ul class="file-list" id="fileList"></ul>
+    <button class="btn-download" onclick="downloadZip()">📥 Baixar ZIP</button>
+    <button class="btn-reset" onclick="resetar()">↩ Processar outro documento</button>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  Desenvolvido por <strong>Gustavo Francisco</strong>
+</div>
+
+<script>
+  let tipoAtivo = null;
+  let arquivoAtivo = null;
+  let zipBlob = null;
+
+  // ── Tipo ──────────────────────────────────────────
+  function selectTipo(el) {
+    document.querySelectorAll('.doc-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    tipoAtivo = el.dataset.tipo;
+    updateBtn();
+  }
+
+  // ── Arquivo ───────────────────────────────────────
+  function onFileChange(input) {
+    if (input.files.length > 0) setArquivo(input.files[0]);
+  }
+
+  function setArquivo(file) {
+    arquivoAtivo = file;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatBytes(file.size);
+    document.getElementById('fileChip').style.display = 'flex';
+    document.getElementById('uploadIcon').textContent = '✅';
+    updateBtn();
+  }
+
+  function removeFile() {
+    arquivoAtivo = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileChip').style.display = 'none';
+    document.getElementById('uploadIcon').textContent = '📤';
+    updateBtn();
+  }
+
+  function formatBytes(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(0) + ' KB';
+    return (b / 1024 / 1024).toFixed(1) + ' MB';
+  }
+
+  function updateBtn() {
+    document.getElementById('btnProcess').disabled = !(tipoAtivo && arquivoAtivo);
+  }
+
+  // ── Drag & Drop ───────────────────────────────────
+  const zone = document.getElementById('uploadZone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', e => { if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over'); });
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type === 'application/pdf') setArquivo(file);
+  });
+
+  // ── Processar ─────────────────────────────────────
+  async function processar() {
+    if (!tipoAtivo || !arquivoAtivo) return;
+
+    setLoading(true);
+    document.getElementById('errorBox').style.display = 'none';
+    document.getElementById('resultCard').style.display = 'none';
+
+    const fd = new FormData();
+    fd.append('file', arquivoAtivo);
+    fd.append('tipo', tipoAtivo);
+
+    try {
+      const resp = await fetch('/api/process', { method: 'POST', body: fd });
+
+      if (!resp.ok) {
+        const txt = await resp.text();
+        throw new Error(txt || `Erro ${resp.status}`);
+      }
+
+      const filesHeader = resp.headers.get('X-Files');
+      const files = filesHeader ? JSON.parse(filesHeader) : [];
+
+      zipBlob = await resp.blob();
+
+      // Exibir resultado
+      document.getElementById('resultCount').textContent =
+        `${files.length} arquivo${files.length !== 1 ? 's' : ''} gerado${files.length !== 1 ? 's' : ''}`;
+
+      const list = document.getElementById('fileList');
+      list.innerHTML = '';
+      files.forEach(f => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>📄</span>${f}`;
+        list.appendChild(li);
+      });
+
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    } catch (err) {
+      document.getElementById('errorBox').style.display = 'flex';
+      document.getElementById('errorText').textContent = err.message;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function setLoading(on) {
+    const btn = document.getElementById('btnProcess');
+    btn.disabled = on;
+    document.getElementById('btnIcon').innerHTML = on
+      ? '<div class="spinner"></div>'
+      : '🚀';
+    document.getElementById('btnText').textContent = on ? 'Processando...' : 'Processar Documento';
+  }
+
+  // ── Download ──────────────────────────────────────
+  function downloadZip() {
+    if (!zipBlob) return;
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'documentos.zip';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Reset ─────────────────────────────────────────
+  function resetar() {
+    zipBlob = null;
+    removeFile();
+    document.getElementById('resultCard').style.display = 'none';
+    document.getElementById('errorBox').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>
